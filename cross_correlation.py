@@ -38,7 +38,8 @@ def read_from_bin(filepath, channels):
         for col in range(0, channels-1):
             raw_data[row, col] = adc_data[row*channels+col]
     plt.plot(raw_data)
-    
+    plt.show()
+    print raw_data
     
 read_from_bin("adcData.bin", 5)
 

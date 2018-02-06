@@ -37,6 +37,7 @@ def read_from_bin(filepath, channels):
     for row in range(0, samples-2):
         for col in range(0, channels-1):
             raw_data[row, col] = adc_data[row*channels+col]
+
     return raw_data
 
 def main():
@@ -50,7 +51,7 @@ def main():
     channel2 = [row[1] for row in raw_data]
     channel3 = [row[2] for row in raw_data]
     for i in range(
-    
+
 main()
 
 """

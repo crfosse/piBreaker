@@ -169,8 +169,8 @@ int main(int argc, char *argv[])
 
     float expected_sample_freq_khz = 1000.0/(1.0*REPEAT_MICROS);
 
-    printf("# Starting sampling: %ld samples (expected Tp = %d us, expected Fs = %.3f kHz).\n",
-    num_samples,REPEAT_MICROS,expected_sample_freq_khz);
+    /*printf("# Starting sampling: %ld samples (expected Tp = %d us, expected Fs = %.3f kHz).\n",
+    num_samples,REPEAT_MICROS,expected_sample_freq_khz);*/
 
     // Start DMA engine and start sending ADC reading commands
     gpioWaveTxSend(wid, PI_WAVE_MODE_REPEAT);
@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
     double nominal_period_us = 1.0*(end_time-start_time)/(1.0*num_samples)*1.0e06;
     double nominal_sample_freq_khz = 1000.0/nominal_period_us;
 
-    printf("# %ld samples in %.6f seconds (actual T_p = %f us, nominal Fs = %.2f kHz).\n",
-        num_samples, end_time-start_time, nominal_period_us, nominal_sample_freq_khz);
+  /*  printf("# %ld samples in %.6f seconds (actual T_p = %f us, nominal Fs = %.2f kHz).\n",
+        num_samples, end_time-start_time, nominal_period_us, nominal_sample_freq_khz);*/
 
     double output_nominal_period_us = floor(nominal_period_us); //the clock is accurate only to us resolution
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     fwrite(&output_nominal_period_us, sizeof(double), 1, adc_data_file);
     fwrite(val, sizeof(uint16_t), ADCS*num_samples, adc_data_file);
     fclose(adc_data_file);
-    printf("# Data written to file. Program ended successfully.\n\n");
+    //printf("# Data written to file. Program ended successfully.\n\n");
 
     // Print warning about nominal and expected sample period. This probably
     // has to be fixed in the pigpio or even the rpi Linux kernel itself. Once
@@ -238,12 +238,12 @@ int main(int argc, char *argv[])
     // apparently isn't able to correctly control the PCM or PWM for timing,
     // and we get a sample rate Fs_nominal = 0.8*Fs_expected.
     // It still samples correctly, just at a slightly lower rate.
-    if (fabs(nominal_sample_freq_khz - expected_sample_freq_khz) > 1.0) {
+    /*if (fabs(nominal_sample_freq_khz - expected_sample_freq_khz) > 1.0) {
         fprintf(stderr, "# Nominal sample rate differs from expected sample rate, but this might be expected\n"
                         "# due to interference with the HDMI output or the audio output. See the lab manual.\n"
                         "\n"
                         "# A nominal sample period of Tp = %f us was written to output file.\n", output_nominal_period_us);
-    }
+    }*/
 
     gpioTerminate();
     free(val);

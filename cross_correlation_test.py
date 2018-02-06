@@ -1,0 +1,116 @@
+import operator
+import struct
+import time
+from scipy.signal import butter, lfilter, resample
+import numpy as np
+from subprocess import call
+
+def filter(data, f1, f2, fs):
+    nyq = 0.5*fs
+    low = f1/nyq
+    high = f2/nyq
+
+    b, a = butter(5, [low, high], btype='band')
+    y = lfilter(b, a, data)
+    return y
+
+
+
+def delay_from_corr(set1, set2, fs, f1, f2):    
+    y1 = filter(set1, f1, f2, fs)
+    y2 = filter(set2, f1, f2, fs)
+
+    xcorr = np.absolute(np.correlate(y1, y2, "full")) #absolute value?
+    index, value = max(enumerate(xcorr), key=operator.itemgetter(1)) 
+    sample_delay = (len(xcorr)+1)/2-1-index
+    time_delay = float(sample_delay)/fs #in seconds
+    #print "Value: %d, Index: %d" % (value, index)
+    
+    return time_delay
+
+def read_from_bin(filepath, channels):
+    sample_period = np.fromfile(filepath, dtype = "double", count=1,sep='')
+    adc_data = np.fromfile(filepath, dtype="uint16", count=-1, sep='')
+    adc_data = np.delete(adc_data,[0,1,2,3])
+
+    len_data = len(adc_data) 
+    samples = len_data/channels
+    raw_data = np.zeros((samples,channels), dtype="uint16")
+    for row in range(0, samples):
+        for col in range(0, channels):
+            raw_data[row, col] = adc_data[row*channels+col]
+    return raw_data, sample_period
+
+def angle_calculation(t1,t2,t3):
+    if t1 == 0 and t2 == 0 and t3 == 0:
+        return -1
+
+    if t1 -t2 -2*t3 == 0: 
+        if t1 > 0: 
+            return 270
+        else: 
+            return 90
+    
+    theta_rad = np.arctan(1.1472*(t1+t2)/(t1-t2-2*t3))
+    theta = theta_rad*180/3.14
+    if t3 < 0:
+        theta = theta + 180
+    elif theta < 0: 
+        theta = theta + 360
+    
+    return theta
+
+def sampling(channels, f1, f2):
+     
+
+    call("sudo ./adc_sampler 2500", shell=True)
+
+    [raw_data, sample_period] = read_from_bin("adcData.bin", channels)
+
+    fs = int(1/sample_period*10**6)
+
+    channel1 = np.transpose(raw_data[:,0])
+    channel2 = np.transpose(raw_data[:,1])
+    channel3 = np.transpose(raw_data[:,2])
+    
+    
+
+    N = 10000
+    channel1 = resample(channel1, N)
+    channel2 = resample(channel2, N)
+    channel3 = resample(channel3, N)
+
+    time_delay1 = delay_from_corr(channel2, channel1, fs, f1, f2)
+    time_delay2 = delay_from_corr(channel3, channel1, fs, f1, f2)
+    time_delay3 = delay_from_corr(channel3, channel2, fs, f1, f2)
+    """
+    print  time_delay1
+    print  time_delay2
+    print  time_delay3
+    """
+
+    theta = angle_calculation(time_delay1, time_delay2, time_delay3)
+    
+    return theta
+
+
+def main():
+    channels = 5
+    f1 = 400
+    f2 = 5000
+    avg = 0
+    N = 5
+    angle_list = np.zeros((N,1), dtype=float)
+    for i in range(0, N):
+        theta = sampling(channels, f1, f2)
+        print "Angle %i : %f" % (i, theta)
+        angle_list[i] = theta
+
+    avg = np.mean(angle_list)
+    std = np.std(angle_list)
+
+    print "Average: %f" % avg
+    print "Std: %f" % std
+
+
+main()

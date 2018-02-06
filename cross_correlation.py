@@ -2,7 +2,7 @@ import operator
 import struct
 from scipy.signal import butter, lfilter
 import numpy as np
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def filter(data, f1, f2, fs):
     nyq = 0.5*fs
@@ -34,13 +34,24 @@ def read_from_bin(filepath, channels):
     len_data = len(adc_data) 
     samples = len_data/channels
     raw_data = np.zeros((samples,channels), dtype="uint16")
-    for row in range(0, samples-1):
+    for row in range(0, samples-2):
         for col in range(0, channels-1):
             raw_data[row, col] = adc_data[row*channels+col]
-    plt.plot(raw_data)
+    return raw_data
+
+def main():
+    filepath = "adcData.bin"
+    channels = 5
+
+    raw_data = read_from_bin(filepath, channels)
+    for 
+
+    channel1 = [row[0] for row in raw_data]
+    channel2 = [row[1] for row in raw_data]
+    channel3 = [row[2] for row in raw_data]
+    for i in range(
     
-    
-read_from_bin("adcData.bin", 5)
+main()
 
 """
 array1 = [0, 1, 2, 3, 4]

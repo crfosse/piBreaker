@@ -45,20 +45,21 @@ def angle_calculation(t1,t2,t3):
     if t1 == 0 and t2 == 0 and t3 == 0:
         return -1
 
-    if t1 -t2 -2*t3 == 0: 
-        if t1 > 0: 
-            return 270
-        else: 
-            return 90
+    #if t1 -t2 -2*t3 == 0: 
+    #    if t1 > 0: 
+    #        return 270
+    #    else: 
+    #        return 90
     
-    theta_rad = np.arctan(1.1472*(t1+t2)/(t1-t2-2*t3))
+    theta_rad = np.arctan2(1.1472*(t1+t2),(t1-t2-2*t3))
     theta = theta_rad*180/3.14
-    if t3 < 0:
-        theta = theta + 180
-    elif theta < 0: 
-        theta = theta + 360
+
+    #if t3 < 0:
+    #    theta = theta + 180
+    #if theta < 0: 
+    #    theta = theta + 360
     
-    return theta
+    return theta + 180
 
 def sampling(channels, f1, f2):
      

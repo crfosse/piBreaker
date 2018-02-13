@@ -94,13 +94,14 @@ def sampling(channels, f1, f2):
     return theta
 
 
-def main():
+def main(measurementNr, realAngle):
     channels = 5
     f1 = 400
     f2 = 5000
     avg = 0
     N = 5
     angle_list = np.zeros((N,1), dtype=float)
+    
     for i in range(0, N):
         theta = sampling(channels, f1, f2)
         print "Angle %i : %f" % (i, theta)
@@ -112,5 +113,14 @@ def main():
     print "Average: %f" % avg
     print "Std: %f" % std
 
+    
+    result_file = open("angle_meas_results.csv", "a")
+    result_string = "%d, %f, %f, %f" % (measurementNr, realAngle, avg, std)
+    for x in range(0,N): 
+        result_string += ',%f' % angle_list[x]
 
-main()
+    result_string += '\n'
+    result_file.write(result_string)
+    result_file.close()
+
+#main()

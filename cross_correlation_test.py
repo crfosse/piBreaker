@@ -160,3 +160,29 @@ def readRadar(measurementNr):
     result_file.write(result_string)
     result_file.close()
 
+def fftRadarSampling(measurementNr):
+    
+    filename = "radar_sampling_nr_%d.csv" %measurementNr
+    sampl_file = open(filename, "r")
+    
+    channel4 = []
+    channel5 = []
+    for line in sampl_file:
+        numbers = line.split(', ')
+
+        channel4.append(numbers[0])
+        temp5 = numbers[1].replace('\n','')        
+        channel5.append(temp5)
+
+    channel4Complex = 1j*np.array(channel4, dtype=float)
+    channel5 = np.array(channel5, dtype=float)
+    spectrumComplex = np.fft.fft(channel4Complex + channel5)
+    spectrumComplex[0] = 0 #Removing DC
+    spectrumComplex[len(spectrumComplex)-1] = 0 #Removing high shit
+    print float(np.argmax(spectrumComplex))/len(spectrumComplex) 
+    print spectrumComplex
+    print np.amax(spectrumComplex)
+
+#readRadar(1)
+#fftRadarSampling(1)
+

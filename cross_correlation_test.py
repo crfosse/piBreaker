@@ -94,6 +94,23 @@ def sampling(channels, f1, f2):
     
     return theta
 
+def samplingRadar(channels, f1, f2):
+    
+    call("sudo ./adc_sampler 32768", shell=True) #2^15 samples
+
+    [raw_data, sample_period] = read_from_bin("adcData.bin", channels)
+
+    fs = int(1/sample_period*10**6)
+
+    channel4 = np.transpose(raw_data[:,3])
+    channel5 = np.transpose(raw_data[:,4])
+
+
+    N = 10000
+    channel4 = resample(channel4, N)
+    channel5 = resample(channel5, N)
+    
+    return channel4, channel4
 
 def main(measurementNr, realAngle):
     channels = 5
@@ -124,4 +141,22 @@ def main(measurementNr, realAngle):
     result_file.write(result_string)
     result_file.close()
 
-#main()
+def readRadar(measurementNr):
+    
+    channels = 5
+    f1 = 400
+    f2 = 5000
+    
+    channel4, channel5 = samplingRadar(channels, f1, f2)
+    
+    N = len(channel4)
+    
+    filename = "radar_sampling_nr_%d.csv" %measurementNr
+    result_file = open(filename, "a")
+    result_string = ""
+    for x in range(0,N): 
+        result_string += '%f, %f\n' % (channel4[x], channel4[x])
+
+    result_file.write(result_string)
+    result_file.close()
+

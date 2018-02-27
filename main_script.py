@@ -94,9 +94,11 @@ def sampling(channels, f1, f2):
     
     return theta
 
-def samplingRadar(channels, f1, f2):
-    
-    call("sudo ./adc_sampler 32768", shell=True) #2^15 samples
+def samplingRadar(channels, f1, f2, samples):
+
+    callString = "sudo ./adc_sampler " + str(samples)
+
+    call(callString, shell=True) #2^16 samples
 
     [raw_data, sample_period] = read_from_bin("adcData.bin", channels)
 
@@ -105,16 +107,18 @@ def samplingRadar(channels, f1, f2):
     channel4 = np.transpose(raw_data[:,3])
     channel5 = np.transpose(raw_data[:,4])
 
+   # channel4 = filter(channel4, f1, f2, fs)
+   # channel5 = filter(channel5, f1, f2, fs)
 
-    N = 10000
-    channel4 = resample(channel4, N)
-    channel5 = resample(channel5, N)
+    #N = 40000
+    #channel4 = resample(channel4, N)
+    #hannel5 = resample(channel5, N)
     
-    return channel4, channel4
+    return channel4, channel5, sample_period
 
 def main(measurementNr, realAngle):
     channels = 5
-    f1 = 400
+    f1 = 1
     f2 = 5000
     avg = 0
     N = 5
@@ -141,21 +145,27 @@ def main(measurementNr, realAngle):
     result_file.write(result_string)
     result_file.close()
 
-def readRadar(measurementNr):
-    
+def readRadar(measurementNr):   
+
     channels = 5
     f1 = 400
     f2 = 5000
+    samples = 65536
+
+    print "Sampling start"
     
-    channel4, channel5 = samplingRadar(channels, f1, f2)
+    [channel4, channel5, sample_period]  = samplingRadar(channels, f1, f2, samples)
     
+    print "Sampling done"
+
     N = len(channel4)
     
     filename = "radar_sampling_nr_%d.csv" %measurementNr
-    result_file = open(filename, "a")
-    result_string = ""
-    for x in range(0,N): 
-        result_string += '%f, %f\n' % (channel4[x], channel4[x])
+    result_file = open(filename, "w")
+    result_string = '%f, %f\n' % (sample_period, 0) #sample_period on first line
+    #Ignoring first half
+    for x in range(32768+1,N): 
+        result_string += '%f, %f\n' % (channel4[x], channel5[x])
 
     result_file.write(result_string)
     result_file.close()

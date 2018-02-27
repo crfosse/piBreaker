@@ -150,7 +150,7 @@ def readRadar(measurementNr):
     channels = 5
     f1 = 400
     f2 = 5000
-    samples = 65536
+    samples = 32768
 
     print "Sampling start"
     
@@ -164,7 +164,7 @@ def readRadar(measurementNr):
     result_file = open(filename, "w")
     result_string = '%f, %f\n' % (sample_period, 0) #sample_period on first line
     #Ignoring first half
-    for x in range(32768+1,N): 
+    for x in range(1,N): 
         result_string += '%f, %f\n' % (channel4[x], channel5[x])
 
     result_file.write(result_string)

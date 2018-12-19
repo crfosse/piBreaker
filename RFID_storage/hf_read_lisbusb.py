@@ -1,16 +1,17 @@
-import usb1
-with usb1.USBContext() as context:
-    handle = context.openByVendorIDAndProductID(
-        VENDOR_ID,
-        PRODUCT_ID,
-        skip_on_error=True,
-    )
-    if handle is None:
-        # Device not present, or user is not allowed to access device.
-        print "handle is None"
-    with handle.claimInterface(INTERFACE):
-        # Do stuff with endpoints on claimed interface.
-        print "handle is not none"
- #       while True:
- #           data = handle.bulkRead(ENDPOINT, BUFFER_SIZE)
-            # Process data...
+# using libusb1: https://pypi.org/project/libusb1/#supported-oses
+
+# using serial https://raspberrypi.stackexchange.com/questions/13930/capturing-serial-number-of-2-usb-rfid-reader-in-python-pi2-rfid-mifire-rfid?fbclid=IwAR3kyBryBN-X7jhMRq_aGlz3xqmFBOVZ7k6xKHkMUQuqNQA0sUdoKUDJIHo 
+
+
+
+import serial
+ser = serial.Serial('/dev/tty.usbmodem1411', 9600) # here you have to write your port. If you dont know how to find it just write ls -l /dev/tty.* in your terminal (i'm using mac)
+
+while True:
+    try:
+        response = ser.readline()
+        print response
+    except KeyboardInterrupt:
+        break
+
+ser.close()

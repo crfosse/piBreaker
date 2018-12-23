@@ -1,0 +1,25 @@
+Ethernet adapter Ethernet 3 address while connected to x1, not guaranteed consistency
+IP: 169.254.226.70
+Subnet Mask: 255.255.0.0
+
+Ethernet adapter Ethernet 4
+169.254.33.220
+169.254.33.220
+
+Static ip: 
+192.168.0.10
+
+
+Kernel IP gateway 
+192.168.0.1
+192.168.43.1
+
+
+Resolveconf
+192.168.0.1
+8.8.8.8
+fd51:42f8:caae:d92e::1
+
+
+Stepper info: 
+https://www.sinoning.com/products/long-shaft-shinano-kenshi-stp-42d1112-stepping-motor-1-8-2-6kg-cm-42 

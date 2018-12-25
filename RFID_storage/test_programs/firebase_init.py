@@ -1,4 +1,4 @@
-
+#Fungerer ikke, trenger ikke. 
 from firebase import firebase_admin
 from firebase_admin import credentials
 

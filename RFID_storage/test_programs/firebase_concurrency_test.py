@@ -1,4 +1,5 @@
 # https://pypi.org/project/python-firebase/ 
+#Fungerer ikke, gidder ikke. Det er stress, vi bruker heller loop.
 
 import json
  from firebase import firebase

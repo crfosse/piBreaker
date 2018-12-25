@@ -8,8 +8,7 @@ while 1:
     result = firebase.get('/items',None)
     
     if result != result_old: 
-        print result[:1]
-        data = json.loads(results)
+        print result
 
     result_old = result
 

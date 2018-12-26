@@ -1,3 +1,8 @@
+Outline app: 
+
+
+
+Internet connection info: 
 Ethernet adapter Ethernet 3 address while connected to x1, not guaranteed consistency
 IP: 169.254.226.70
 Subnet Mask: 255.255.0.0
@@ -21,11 +26,27 @@ Resolveconf
 fd51:42f8:caae:d92e::1
 
 
+Firebase: 
+Communication: 
+Python-firebase
+https://pypi.org/project/python-firebase/
+
+Python-firebase examples
+https://www.c-sharpcorner.com/article/firebase-crud-operations-using-python/
+
+
+
 Stepper info: 
 https://www.sinoning.com/products/long-shaft-shinano-kenshi-stp-42d1112-stepping-motor-1-8-2-6kg-cm-42 
 
 Python control stepper: 
 https://www.raspberrypi-spy.co.uk/2012/07/stepper-motor-control-in-python/ 
 
+L298N with stepper
+https://www.instructables.com/id/Control-DC-and-stepper-motors-with-L298N-Dual-Moto/ 
+
+
 # Physical pins 11,15,16,18
 # GPIO17,GPIO22,GPIO23,GPIO24
+
+

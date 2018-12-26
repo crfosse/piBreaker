@@ -3,3 +3,4 @@ firebase = firebase.FirebaseApplication('https://rfid-storage.firebaseio.com',No
 
 result = firebase.post('/items/','carl er rar')
 print result
+

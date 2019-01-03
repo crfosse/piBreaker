@@ -50,3 +50,15 @@ https://www.instructables.com/id/Control-DC-and-stepper-motors-with-L298N-Dual-M
 # GPIO17,GPIO22,GPIO23,GPIO24
 
 
+NFC reader raspberry: 
+Link: https://learn.adafruit.com/adafruit-nfc-rfid-on-raspberry-pi/ 
+For finding ID when checking in items to the storage. 
+Link for product description: 
+
+NFCPy is used to control the reader: 
+https://nfcpy.readthedocs.io/en/latest/topics/get-started.html#read-and-write-tags 
+
+
+Connect to raspberry pi ports: 
+
+

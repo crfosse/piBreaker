@@ -24,8 +24,12 @@ def read_id(tag):
 clf = nfc.ContactlessFrontend()
 assert clf.open('tty:AMA0:pn532') is True
 
-tag = clf.connect(rdwr={
-    'on-connect': lambda tag:  read_id(tag)
-    #lambda tag: False #Simple function that stops the process after the card has been found
-    })
 
+while(1): 
+	
+	tag = clf.connect(rdwr={
+   	 'on-connect': lambda tag:  read_id(tag)
+   	 #lambda tag: False #Simple function that stops the process after the card has been found
+   	 })
+
+clf.close()

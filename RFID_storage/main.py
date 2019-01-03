@@ -1,3 +1,5 @@
+import time
+
 import nfc
 
 from firebase import firebase
@@ -5,6 +7,7 @@ firebase = firebase.FirebaseApplication('https://rfid-storage.firebaseio.com',No
 
 from multiprocessing import Pool
 
+#Firebase functions:
 def store_item(uid):
 
 	storage_position = firebase.get("rotation position",None)
@@ -14,27 +17,34 @@ def store_item(uid):
 	result = firebase.put(path,"storage position",storage_position)
 	return result
 
-
+#NFC functions:
 def read_id(tag):
     
     tag_id = str(tag)[12:]
+    print(tag_id)
     result = store_item(tag_id)
     print result
-
-    return True #Returns to the connect function and keeps listening for new cards.
+	
+    return True  #Returns to the connect function and keeps listening for new cards. This doesn't seem to work however 
 
 def tag_search():
 	print("tag_search")
-	'''
 	tag = clf.connect(rdwr={
    	 'on-connect': lambda tag:  read_id(tag)
    	 #lambda tag: False #Simple function that stops the process after the card has been found
    	})
-	   '''
-	return "tag_search"
+	if(tag == True):
+		tag_search()
 
-def check_rotation_pos():
+#Stepper functions:
+def stepper_control(pos): 
+	return True	
+
+def rotate_storage():
 	storage_position = firebase.get("rotation position",None)
+	
+	if(storage_position != -1):
+	     stepper_control(storage_position)
 
 	return storage_position
 
@@ -45,11 +55,27 @@ assert clf.open('tty:AMA0:pn532') is True
 
 #Async:
 pool = Pool()
-result1 = pool.apply_async(tag_search)
-result2 = pool.apply_async(check_rotation_pos)
-answer1 = resutl1.get(timeout=10)
-answer2 = result2.get(timeout=10)
+answer2 = 0
 
-	
-#Postludium:
-clf.close()
+try:
+	pool.apply_async(tag_search)
+
+	while(answer2 != -1):
+		#result1 = pool.apply_async(tag_search)
+		result2 = pool.apply_async(rotate_storage)
+
+		#answer1 = result1.get(timeout=10)
+		answer2 = result2.get(timeout=10)
+
+		#print answer1
+		print answer2
+except KeyboardInterrupt:
+	print("Caught Keyboard interrupt")
+	pool.terminate()
+	pool.join()
+	clf.close()	
+else: 
+	print "Quitting normaly"
+	pool.close()
+	pool.join()
+	clf.close()

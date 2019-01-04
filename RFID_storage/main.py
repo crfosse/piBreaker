@@ -39,13 +39,12 @@ def stepper_control(pos):
 	return True	
 
 def rotate_storage():
-	storage_position = int(firebase.get("rotation position",None))
-
+	storage_position = firebase.get("rotation position",None)
+	
 	if(storage_position > 0 | storage_position < 5):
 	    stepper_control(storage_position)
 
 	return storage_position
-
 
 
 #init:
@@ -53,24 +52,23 @@ clf = nfc.ContactlessFrontend()
 assert clf.open('tty:AMA0:pn532') is True
 
 
-
 #Async:
 pool = Pool()
-rotation_answer = 0
+storage_pos = 0
 
 #Error handling: https://jreese.sh/blog/python-multiprocessing-keyboardinterrupt 
 try:
-	tag_result = pool.apply_async(tag_search)
+	pool.apply_async(tag_search)
 
-	while(rotation_answer  != -1):
+	while(storage_pos != -1):
 		
 		rotation_result = pool.apply_async(rotate_storage)
 
 		rotation_answer = rotation_result.get(timeout=10)
 
 		print rotation_answer
-	pool.terminate()
 
+	answer1 = result1.get(timeout=1) #Shutting down the tag_search in a super ugly way.
 except KeyboardInterrupt:
 	print("Caught Keyboard interrupt")
 	pool.terminate()

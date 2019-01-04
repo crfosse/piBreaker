@@ -61,4 +61,5 @@ https://nfcpy.readthedocs.io/en/latest/topics/get-started.html#read-and-write-ta
 
 Connect to raspberry pi ports: 
 
-
+Async error handling: 
+https://jreese.sh/blog/python-multiprocessing-keyboardinterrupt 

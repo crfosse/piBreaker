@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from firebase import firebase
 firebase = firebase.FirebaseApplication('https://rfid-storage.firebaseio.com',None)
 
+import serial
 
 #Firebase functions:
 def store_item(uid):
@@ -51,6 +52,8 @@ def rotate_storage():
 clf = nfc.ContactlessFrontend()
 assert clf.open('tty:AMA0:pn532') is True
 
+ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
+
 
 #Async:
 pool = Pool()
@@ -66,6 +69,7 @@ try:
 
 		rotation_answer = rotation_result.get(timeout=10)
 
+		ser.write(str(rotation_answer))
 		print rotation_answer
 
 	answer1 = result1.get(timeout=1) #Shutting down the tag_search in a super ugly way.

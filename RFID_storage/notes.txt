@@ -45,6 +45,9 @@ https://www.raspberrypi-spy.co.uk/2012/07/stepper-motor-control-in-python/
 L298N with stepper
 https://www.instructables.com/id/Control-DC-and-stepper-motors-with-L298N-Dual-Moto/ 
 
+Stepper 2:
+http://shop.cpu.com.tw/product/43754/info?fbclid=IwAR0KOsKB5rCWogtCoeiVMc7RBhvKeqwHfEzGGifaxPDudmv4e--s27OWpow 
+
 
 # Physical pins 11,15,16,18
 # GPIO17,GPIO22,GPIO23,GPIO24

@@ -44,7 +44,12 @@ def rotate_storage():
 
 #Button function: 
 def button_insert2storage(pin_number):
-    print "CLICKED
+	storage_position = firebase.get("rotation position", None)
+	if(storage_position == 4):
+		result = firebase.put("/","rotation position",1)
+	else: 
+		result = firebase.put("/","rotation position", storage_position + 1)	
+	print result
 
 #init:
 clf = nfc.ContactlessFrontend()

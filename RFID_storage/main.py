@@ -1,11 +1,12 @@
 import time
 import nfc
 from multiprocessing import Pool
+import RPi.GPIO as GPIO #For button interrupt
 
 from firebase import firebase
 firebase = firebase.FirebaseApplication('https://rfid-storage.firebaseio.com',None)
 
-import serial
+import serial #For arduino communication
 
 #Firebase functions:
 def store_item(uid):
@@ -41,12 +42,21 @@ def rotate_storage():
 
 	return storage_position
 
+#Button function: 
+def button_insert2storage(pin_number):
+    print "CLICKED
 
 #init:
 clf = nfc.ContactlessFrontend()
 assert clf.open('tty:AMA0:pn532') is True
 
 ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
+
+#Button interrupt:
+GPIO.setmode(GPIO.BOARD) #Physical pin numbering
+GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
+
+GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage)
 
 
 #Async:
@@ -78,6 +88,7 @@ except KeyboardInterrupt:
 	clf.close()
 	ser.write('1')
 	ser.close()	
+	GPIO.cleanup()
 else: 
 	print "Quitting normaly"
 	pool.close()
@@ -85,3 +96,4 @@ else:
 	clf.close()
 	ser.write('1')
 	ser.close()
+	GPIO.cleanup()

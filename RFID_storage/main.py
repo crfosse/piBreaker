@@ -44,24 +44,24 @@ def rotate_storage():
 
 #Button function: 
 def button_insert2storage(pin_number):
-	storage_position = firebase.get("rotation position", None)
-	if(storage_position == 4):
-		result = firebase.put("/","rotation position",1)
-	else: 
-		result = firebase.put("/","rotation position", storage_position + 1)	
-	print result
-
+	if (pin_number == 16): 
+		global button_pressed
+		button_pressed  = True
+	
 #init:
 clf = nfc.ContactlessFrontend()
 assert clf.open('tty:AMA0:pn532') is True
 
 ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
+global button_pressed
+button_pressed = False
+
 
 #Button interrupt:
 GPIO.setmode(GPIO.BOARD) #Physical pin numbering
 GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
 
-GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage)
+GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage, bouncetime=3000)
 
 
 #Async:
@@ -74,6 +74,14 @@ try:
 	pool.apply_async(tag_search)
 
 	while(storage_pos != -1):
+		if(button_pressed == True):
+			#global button_pressed
+			button_pressed  = False
+			stor_pos = old_rotation #firebase.get("rotation position", None)
+			if(stor_pos == 4):
+				result = firebase.put("/","rotation position",1)
+			else: 
+				result = firebase.put("/","rotation position",(stor_pos + 1))	
 		
 		rotation_result = pool.apply_async(rotate_storage)
 
@@ -85,7 +93,7 @@ try:
 			#time.sleep(500)
 			#print ser.readline()
 
-	answer1 = result1.get(timeout=1) #Shutting down the tag_search in a super ugly way.
+	#answer1 = result1.get(timeout=1) #Shutting down the tag_search in a super ugly way.
 except KeyboardInterrupt:
 	print("Caught Keyboard interrupt")
 	pool.terminate()

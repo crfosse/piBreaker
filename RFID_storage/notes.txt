@@ -31,7 +31,6 @@ Communication:
 Python-firebase
 https://pypi.org/project/python-firebase/
 
-Python-firebase examples
 https://www.c-sharpcorner.com/article/firebase-crud-operations-using-python/
 
 

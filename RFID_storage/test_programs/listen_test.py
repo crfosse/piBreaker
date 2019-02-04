@@ -1,7 +1,8 @@
+#A test of a really unpractical way of infinitely listening to firebase. Exchange *********** with the relevant firebase address. 
 from firebase import firebase
 import json
 
-firebase = firebase.FirebaseApplication('https://RFID-storage.firebaseio.com',None)
+firebase = firebase.FirebaseApplication('https://***********.firebaseio.com',None)
 
 result_old = 0
 while 1: 

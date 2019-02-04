@@ -28,13 +28,19 @@ def read_id(tag):
 	
     return True  #Returns to the connect function and keeps listening for new cards. This doesn't seem to work however 
 
+
+def tag_search_indefinitely():
+	tag = True
+	while (tag == True):
+		print("tag_search")
+		tag = tag_search()
+
+
 def tag_search():
-	print("tag_search")
 	tag = clf.connect(rdwr={
    	 'on-connect': lambda tag:  read_id(tag)
    	})
-	if(tag == True):
-		tag_search() #Not exactly a pretty solution...
+	return tag
 
 #Stepper functions:
 def rotate_storage():
@@ -49,8 +55,12 @@ def button_insert2storage(pin_number):
 		button_pressed  = True
 	
 #init:
+
 clf = nfc.ContactlessFrontend()
-assert clf.open('tty:AMA0:pn532') is True
+try:
+	assert clf.open('tty:AMA0:pn532') is True, "Cannot connect to nfc reader"
+except AssertionError:
+	
 
 ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
 global button_pressed

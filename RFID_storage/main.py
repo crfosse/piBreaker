@@ -54,39 +54,47 @@ def button_insert2storage(pin_number):
 		global button_pressed
 		button_pressed  = True
 	
+
 #init:
-def main():
-		
+def init_nfc_reading(): 
 	clf = nfc.ContactlessFrontend()
 
 	error_nfc_connection = "Cannot connect to the nfc reader, might be connected to the wrong port or the last connection was not terminated properly. If the last one happened you might have to restart the nfc reader, good old turn on and off"
 	assert clf.open('tty:AMA0:pn532') is True, error_nfc_connection
+	return clf
 
+def init_arduino_communication(): 
 	error_arduino_connection = "Cannot connect to Arduino, probably trying to connect trough the wrong port"
-	try:
-		ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
-	except Exception:
-		print error_arduino_connection
-		clf.close()
+	ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
+	assert ser, error_arduino_connection
 
-	global button_pressed
-	button_pressed = False
+	return ser
 
-	#Button interrupt:
+def init_button_interrupt(): 
 	GPIO.setmode(GPIO.BOARD) #Physical pin numbering
 	GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
 
 	GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage, bouncetime=3000)
 
 
-	#Async:
-	pool = Pool()
+def main():
+	#Var
 	storage_pos = 0
 	old_rotation = 1
+	global button_pressed
+	button_pressed = False
+
+	#Init
+	init_button_interrupt()	
+	ser = init_arduino_communication()
+	clf = init_nfc_reading()
+
+	#Async:
+	pool = Pool()
 
 	#Error handling: https://jreese.sh/blog/python-multiprocessing-keyboardinterrupt 
 	try:
-		pool.apply_async(tag_search)
+		pool.apply_async(tag_search_indefinitely)
 
 		while(storage_pos != -1):
 			if(button_pressed == True):
@@ -101,6 +109,8 @@ def main():
 			rotation_result = pool.apply_async(rotate_storage)
 
 			rotation_answer = rotation_result.get(timeout=10)
+
+			#Send rotation to the arduino:
 			if(old_rotation != rotation_answer):
 				ser.write(str(rotation_answer))
 				print rotation_answer
@@ -117,6 +127,7 @@ def main():
 		ser.write('1')
 		ser.close()	
 		GPIO.cleanup()
+		raise
 	else: 
 		print "Quitting normally"
 		pool.close()
@@ -125,3 +136,4 @@ def main():
 		ser.write('1')
 		ser.close()
 		GPIO.cleanup()
+		raise

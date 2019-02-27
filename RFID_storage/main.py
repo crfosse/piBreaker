@@ -102,8 +102,8 @@ except KeyboardInterrupt:
 	ser.write('1')
 	ser.close()	
 	GPIO.cleanup()
-else: 
-	print "Quitting normaly"
+except:  
+	print "Error error, dyyyying bye"
 	pool.close()
 	pool.join()
 	clf.close()

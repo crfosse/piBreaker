@@ -2,45 +2,27 @@ import time
 import nfc
 from multiprocessing import Pool
 import RPi.GPIO as GPIO #For button interrupt
-
 from firebase import firebase
-firebase = firebase.FirebaseApplication('https://rfid-storage.firebaseio.com',None)
-
 import serial #For arduino communication
+import atexit
+
+""" firebase structure:
+'rotation position': (possible values: 1, 2, 3, 4),
+'items/<id>' (where <id> is an 8 char hex-string)
+	'storage position': (possible values: 1, 2, 3, 4)
+"""
+firebase = firebase.FirebaseApplication(dsn='https://rfid-storage.firebaseio.com', authentication=None)
+button_pressed = False
+atexit.register(on_exit)
 
 #Firebase functions:
-def store_item(uid):
+def store_item_by_nfc_tag(nfc_tag):
+	item_uid = str(nfc_tag)[12:]
+	position_of_new_item = firebase.get('rotation position', name=None, connection=None)
+	return firebase.put('/items/'+str(item_uid), 'storage position', data=position_of_new_item, connection=None)
 
-	storage_position = firebase.get("rotation position",None)
-
-	path  = '/items/' + str(uid)
-
-	result = firebase.put(path,"storage position",storage_position)
-	return result
-
-#NFC functions:
-def read_id(tag):
-    
-    tag_id = str(tag)[12:]
-    print(tag_id)
-    result = store_item(tag_id)
-    print result
-	
-    return True  #Returns to the connect function and keeps listening for new cards. This doesn't seem to work however 
-
-def tag_search():
-	print("tag_search")
-	tag = clf.connect(rdwr={
-   	 'on-connect': lambda tag:  read_id(tag)
-   	})
-	if(tag == True):
-		tag_search() #Not exactly a pretty solution...
-
-#Stepper functions:
-def rotate_storage():
-	storage_position = firebase.get("rotation position",None)    
-
-	return storage_position
+def nfc_tag_listener(clf):
+	while True: clf.connect(rdwr={ 'on-connect': store_item_by_nfc_tag })
 
 #Button function: 
 def button_insert2storage(pin_number):
@@ -48,65 +30,33 @@ def button_insert2storage(pin_number):
 		global button_pressed
 		button_pressed  = True
 	
-#init:
-clf = nfc.ContactlessFrontend()
-assert clf.open('tty:AMA0:pn532') is True
+def main():
+	clf = nfc.ContactlessFrontend()
+	assert clf.open('tty:AMA0:pn532') is True
+	ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
+	
+	#Button interrupt:
+	GPIO.setmode(GPIO.BOARD) #Physical pin numbering
+	GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
+	GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage, bouncetime=3000)
 
-ser = serial.Serial('/dev/ttyACM0',9600) #Arduino communication
-global button_pressed
-button_pressed = False
+	#Async:
+	pool = Pool()
+	current_position = 0
+	previous_position = 1
 
-
-#Button interrupt:
-GPIO.setmode(GPIO.BOARD) #Physical pin numbering
-GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
-
-GPIO.add_event_detect(16, GPIO.RISING, callback=button_insert2storage, bouncetime=3000)
-
-
-#Async:
-pool = Pool()
-storage_pos = 0
-old_rotation = 1
-
-#Error handling: https://jreese.sh/blog/python-multiprocessing-keyboardinterrupt 
-try:
-	pool.apply_async(tag_search)
-
-	while(storage_pos != -1):
-		if(button_pressed == True):
-			#global button_pressed
-			button_pressed  = False
-			stor_pos = old_rotation #firebase.get("rotation position", None)
-			if(stor_pos == 4):
-				result = firebase.put("/","rotation position",1)
-			else: 
-				result = firebase.put("/","rotation position",(stor_pos + 1))	
+	pool.apply_async(lambda: nfc_tag_listener(clf))
+	while True:
+		if button_pressed:
+			button_pressed = False
+			new_position = (current_position % 4) + 1  # (1->2), (2->3), (3->4), (4->1)
+			firebase.put('/', 'rotation position', new_position, connection=None)
 		
-		rotation_result = pool.apply_async(rotate_storage)
+		firebase_rotation_position = firebase.get('rotation position', name=None, connection=None)
+		if (previous_position != firebase_rotation_position):
+			ser.write(str(firebase_rotation_position))
+			previous_position = firebase_rotation_position
 
-		rotation_answer = rotation_result.get(timeout=10)
-		if(old_rotation != rotation_answer):
-			ser.write(str(rotation_answer))
-			print rotation_answer
-			old_rotation = rotation_answer
-			#time.sleep(500)
-			#print ser.readline()
 
-	#answer1 = result1.get(timeout=1) #Shutting down the tag_search in a super ugly way.
-except KeyboardInterrupt:
-	print("Caught Keyboard interrupt")
-	pool.terminate()
-	pool.join()
-	clf.close()
-	ser.write('1')
-	ser.close()	
-	GPIO.cleanup()
-except:  
-	print "Error error, dyyyying bye"
-	pool.close()
-	pool.join()
-	clf.close()
-	ser.write('1')
-	ser.close()
-	GPIO.cleanup()
+if __name__ == '__main__'
+	main()
